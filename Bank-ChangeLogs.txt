@@ -49,3 +49,12 @@ Changelog:
 
 Bugfix:
 - Fixed a bug in where it is possible to change your account info to be the same attributes with another existing account
+
+
+Version 1.0.4 December 23, 2024
+
+Changelog:
+
+- Added bankreciept function to generate receipts for withdrawals, deposits, and transfers
+- Updated Withdraw, Deposit, and transferFunds functions to call bankreciept with appropriate parameters
+- Updated ChangeIDNumber function to handle input validation and formatting for 12-digit or 14-character National ID numbers

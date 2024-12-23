@@ -62,28 +62,21 @@ class Account:
     def Withdraw(self, Amount):
         if float(Amount) <= float(self.GetCurrentBalance()):
             self.currentBalance = float(self.currentBalance) - float(Amount)
-
-            self.currentBalance  = f"{float(self.currentBalance): .2f}"
-
-            
-
+            self.currentBalance = f"{float(self.currentBalance): .2f}"
             print(f"Withdrawal successful.. \nNew Balance: {self.GetCurrentBalance()} \n\n")
+            bankreciept(accountDatabase, accountDatabase.index(self), "withdraw", Amount)
         else:
             print("Insufficient Funds.\n")
-
 
     def Deposit(self):
         while True:
             try:
                 Amount = float(input("Enter the amount you want to deposit: "))
-
-                if len(str(Amount).split(".")[-1]) >=3:
+                if len(str(Amount).split(".")[-1]) >= 3:
                     print("Invalid amount of decimal places. Please try again \n")
                 elif Amount >= 0:
-
                     while True:
-                        confirm = input(f"Are you sure you want to deposit{Amount: .2f}? Confirm Yes or No. ").lower()
-
+                        confirm = input(f"Are you sure you want to deposit {Amount: .2f}? Confirm Yes or No. ").lower()
                         if confirm == "yes" or confirm == "no":
                             break
                         else:
@@ -92,16 +85,14 @@ class Account:
                         self.currentBalance = float(self.currentBalance) + Amount
                         self.currentBalance = f"{float(self.currentBalance): .2f}"
                         print("Deposit successful \n")
+                        bankreciept(accountDatabase, accountDatabase.index(self), "deposit", Amount)
                         break
-                    
-                    
-                    #self.transactions.append(f"Deposited: {Amount: .2f}")
-                    # From Marc Daniel ung line of code above. Up to you @Lorenz on how to parse it
-
                 else:
                     print("Invalid amount. Please enter a positive value")
             except ValueError:
                 print("Invalid Input. Please enter a numerical value")
+
+#here i added the bank reciept for withdrawal and deposit(lorenz)
 
 
 #Account Information Changes
@@ -510,29 +501,20 @@ def EditAccountInfo(accountDatabase, accountIndex):
         
 def transferFunds(accountDatabase, senderIndex):
     print("--------- Transfer Funds ---------")
-
     sender = accountDatabase[senderIndex]
-    
     if len(accountDatabase) < 2:
         print("At least two accounts are required to transfer funds.")
         return
-
     while True:
         recipientAccountNumber = input("Enter the recipient's account number: \nOr enter exit to exit: \n")
-
-        #For Exit
         if recipientAccountNumber.lower() == "exit":
             print("Returning.......\n")
             return
-
-            
-        # Find the recipient account
         recipient = None
         for account in accountDatabase:
             if account.GetAccountNumber() == recipientAccountNumber:
                 recipient = account
                 break
-
         if not recipient:
             print("Recipient account not found.")
             return
@@ -540,18 +522,13 @@ def transferFunds(accountDatabase, senderIndex):
             print("You cannot transfer funds to your own account.")
             return
         else:
-            #Confirmation
             confirm = input(f"You want to transfer funds to {recipient.GetName()} : {recipient.GetAccountNumber()} Confirm Yes or No: ").lower()
-
             if confirm == "yes" or confirm == "no":
                 break
             else:
                 print("Invalid Input. Please try again. \n")
-
         if confirm == "yes":
             break
-
-    # Get the transfer amount
     while True:
         try:
             amount = float(input("Enter the amount to transfer: "))
@@ -564,10 +541,13 @@ def transferFunds(accountDatabase, senderIndex):
         except ValueError:
             print("Invalid input. Please enter a number.")
 
-    # Perform the transfer
+    #here i change the balance so that the recipt will show the correct balance
     sender.UpdateBalance(-amount)
     recipient.UpdateBalance(amount)
     print(f"Transferred {amount:.2f} to {recipient.GetName()} (Account {recipient.GetAccountNumber()}).\n")
+    bankreciept(accountDatabase, senderIndex, "transfer", amount, accountDatabase.index(recipient))
+
+    #here i add the receipt for the recipient(lorenz)
 
 
 #################################################################################
@@ -643,6 +623,42 @@ def AccountStatusInterface(accountDatabase, accountIndex):
         if userInput == "e":
             break
 
+def bankreciept(accountDatabase, accountIndex, transactionType, amount, recipientIndex=None):
+    bankstatement = "please make sure that you have a copy of your receipt for future reference"
+    
+    def withdrawreciept(accountDatabase, accountIndex):
+        print("------------Withdrawal Receipt------------\n")
+        print(f"Name: {accountDatabase[accountIndex].GetName()}")
+        print(f"Account Number: {accountDatabase[accountIndex].GetAccountNumber()}")
+        print(f"Amount Withdrawn: {amount}")
+        print(f"New Balance: {accountDatabase[accountIndex].GetCurrentBalance()}\n")
+        print(bankstatement)
+    
+    def depositreciept(accountDatabase, accountIndex):
+        print("------------Deposit Receipt------------\n")
+        print(f"Name: {accountDatabase[accountIndex].GetName()}")
+        print(f"Account Number: {accountDatabase[accountIndex].GetAccountNumber()}")
+        print(f"Amount Deposited: {amount}")
+        print(f"New Balance: {accountDatabase[accountIndex].GetCurrentBalance()}\n")
+        print(bankstatement)
+    
+    def transferreciept(accountDatabase, senderIndex, recipientIndex):
+        print("------------Transfer Receipt------------\n")
+        print("Your transaction is successful")
+        print(f"Sender: {accountDatabase[senderIndex].GetName()}")
+        print(f"Recipient: {accountDatabase[recipientIndex].GetName()}")
+        print(f"Amount Transferred: {amount}")
+        print(bankstatement)
+    
+    if transactionType == "withdraw":
+        withdrawreciept(accountDatabase, accountIndex)
+    elif transactionType == "deposit":
+        depositreciept(accountDatabase, accountIndex)
+    elif transactionType == "transfer":
+        transferreciept(accountDatabase, accountIndex, recipientIndex)
+
+
+#Main Loop
 def mainLoop():
     print("------------Welcome to XXX bank------------\n")
 
