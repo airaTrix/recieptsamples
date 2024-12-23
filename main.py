@@ -483,4 +483,203 @@ def EditAccountInfo(accountDatabase, accountIndex):
                               "a.Name\n" +
                               "b.National I.D\n" +
                               "c.Email\n" +
-                              "d.Pho
+                              "d.Phone Number\n" +
+                              "e.Password\n" +
+                              "f.Quit\n").lower()
+
+            if any(userInput == option for option in options):
+                if userInput == "a":
+                    ChangeName(accountDatabase, accountIndex)
+                if userInput == "b":
+                    ChangeIDNumber(accountDatabase, accountIndex)
+                if userInput == "c":
+                    ChangeEmail(accountDatabase, accountIndex)
+                if userInput == "d":
+                    ChangePhoneNumber(accountDatabase, accountIndex)
+                if userInput == "e":
+                    ChangePassword(accountDatabase, accountIndex)
+                break
+            else:
+                print("Invalid Input. Please try again.\n")
+                
+        if userInput == "f":
+            break
+
+
+#########################################################################
+        
+def transferFunds(accountDatabase, senderIndex):
+    print("--------- Transfer Funds ---------")
+
+    sender = accountDatabase[senderIndex]
+    
+    if len(accountDatabase) < 2:
+        print("At least two accounts are required to transfer funds.")
+        return
+
+    while True:
+        recipientAccountNumber = input("Enter the recipient's account number: \nOr enter exit to exit: \n")
+
+        #For Exit
+        if recipientAccountNumber.lower() == "exit":
+            print("Returning.......\n")
+            return
+
+            
+        # Find the recipient account
+        recipient = None
+        for account in accountDatabase:
+            if account.GetAccountNumber() == recipientAccountNumber:
+                recipient = account
+                break
+
+        if not recipient:
+            print("Recipient account not found.")
+            return
+        if recipient == sender:
+            print("You cannot transfer funds to your own account.")
+            return
+        else:
+            #Confirmation
+            confirm = input(f"You want to transfer funds to {recipient.GetName()} : {recipient.GetAccountNumber()} Confirm Yes or No: ").lower()
+
+            if confirm == "yes" or confirm == "no":
+                break
+            else:
+                print("Invalid Input. Please try again. \n")
+
+        if confirm == "yes":
+            break
+
+    # Get the transfer amount
+    while True:
+        try:
+            amount = float(input("Enter the amount to transfer: "))
+            if amount <= 0:
+                print("Amount must be greater than zero.")
+            elif amount > float(sender.GetCurrentBalance()):
+                print("Insufficient balance.")
+            else:
+                break
+        except ValueError:
+            print("Invalid input. Please enter a number.")
+
+    # Perform the transfer
+    sender.UpdateBalance(-amount)
+    recipient.UpdateBalance(amount)
+    print(f"Transferred {amount:.2f} to {recipient.GetName()} (Account {recipient.GetAccountNumber()}).\n")
+
+
+#################################################################################
+
+def AccountStatusInterface(accountDatabase, accountIndex):
+    print("\n")
+
+    while True:
+        print("------------Welcome to your Account Page------------\n")
+        
+        accountDatabase[accountIndex].ShowAccountInformation()
+
+        while True:
+            #Here iinsert ang options for withdrawal, fund transfer, all transaction history etc.. add nyo lang sa userInput ung options (b, c, etc....) and lagay nyo rin ung letter sa options list in lowercase
+
+            options = ["a", "b","c","d","e"] # add option here
+            
+            userInput = input("What would you like to do?\n" +
+                              "A. Edit Account Info\n" +
+                              "B. Withdraw\n" +
+                              "C. Deposit\n" +
+                              "D. Transfer\n" +
+                              "E. Exit\n").lower()
+            if any(userInput == option for option in options):
+                if userInput == "a":
+                    EditAccountInfo(accountDatabase,accountIndex)
+                if userInput == "b":
+                    
+                    while True:
+                        try:
+                            while True:
+                                Amount = input("How much would you like to withdraw?: ")
+
+                                isAmountFloat = float(Amount) #returns valueerror if not float
+
+                                if "." in Amount:
+                                    if not(len(Amount.split(".")[-1]) == 2) and not (len(Amount.split(".")[-1]) == 1):
+                                        print("Invalid Amount of decimal places. Please try again. \n")
+                                    else:
+                                        Amount = f"{float(Amount): .2f}"
+                                        break
+                                elif "." not in Amount:
+                                    Amount = f"{float(Amount): .2f}"
+                                    break
+
+                            while True:
+                                confirm = input(f"You want to withdraw {float(Amount): .2f}. Confirm? Yes or No\n").lower()
+
+                                if confirm == "yes" or confirm == "no":
+                                    break
+                                else:
+                                    print("Invalid Input. Please Try again. \n")
+                                    
+                            if confirm == "yes":
+                                break
+
+                            
+                        except ValueError:
+                            print("Invalid Input. Please try again\n")
+
+                        
+
+                    accountDatabase[accountIndex].Withdraw(Amount)
+                if userInput == "c":
+                    accountDatabase[accountIndex].Deposit()
+                if userInput == "d":
+                    transferFunds(accountDatabase, accountIndex)
+                break
+            else:
+                print("Invalid Input. Please try again")
+
+        #if user chose to quit
+        if userInput == "e":
+            break
+
+def mainLoop():
+    print("------------Welcome to XXX bank------------\n")
+
+    #Ensures that no errors are passed through and handles errors
+    while True:
+         userInput = input("What would you like to do?\n" +
+                           "A. Login to your account\n" +
+                           "B. Create Account\n" +
+                           "C. Quit\n"                                 )
+         #Ensures consistency
+         userInput = userInput.lower()
+         
+         #function selection
+         options = ["a", "b", "c"]
+         if any(userInput == option for option in options):
+             if userInput == "a":
+                if len(accountDatabase) != 0:
+                    Login(accountDatabase)
+                    print("------------Welcome to XXX bank------------\n")
+                else:
+                    print("There are no accounts stored in the database. Please create an account and try again\n")
+             if userInput == "b":
+                AccountCreation(accountDatabase)
+                print("------------Welcome to XXX bank------------\n")
+             if userInput == "c":
+                 break
+         else:
+             print("Input is not valid, Please try again.\n")
+            
+    print("\n You have exited the program.")
+    
+
+        
+    
+
+    
+        
+
+
+mainLoop()
