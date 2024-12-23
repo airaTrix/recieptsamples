@@ -1,15 +1,27 @@
 accountDatabase = []
 
 class Account:
-    def __init__(self, accountNumber, name, idNumber, email,  phoneNumber, password, initialDeposit):
+    def __init__(self, accountNumber, name, idNumber, email, phoneNumber, password, balance, interestRate=0.01):
         self.accountNumber = accountNumber
-        self.FirstName, self.MiddleInitial, self.Surname = name
+        self.name = name
         self.idNumber = idNumber
+        self.FirstName = name[0]
+        self.MiddleInitial = name[1]
+        self.Surname = name[2]
         self.email = email
         self.phoneNumber = phoneNumber
         self.password = password
-        self.currentBalance = initialDeposit #Because at creation, your current balance is the one you started with
+        self.balance = balance
+        self.interestRate = interestRate
 
+    def GetCurrentBalance(self):
+        return self.balance
+
+    def ApplyInterest(self):
+        interest = self.balance * self.interestRate
+        self.balance += interest
+        print(f"Interest of {interest:.2f} applied. New Balance: {self.balance:.2f}")
+#here i added funtions for interest and balance(lorenz)
     def ShowAccountInformation(self):
         print("Account Info: \n")
         print(f"Account Name: {self.GetName()}")
@@ -38,11 +50,8 @@ class Account:
     def GetAccountNumber(self):
         return self.accountNumber #Returns string
 
-    def GetCurrentBalance(self):
-        return self.currentBalance #Returns int
-
     def UpdateBalance(self, value):
-        self.currentBalance = f"{float(self.currentBalance) +  value: .2f}" # For Subtraction, set value as negative ( -100 ) so that currentBalance += (-100)
+        self.FirstName, self.MiddleInitial, self.Surname = name[0], name[1], name[2]
 
     def UpdateName(self, name):
         self.FirstName, self.MiddleInitial, self.Surname = name
@@ -92,8 +101,8 @@ class Account:
             except ValueError:
                 print("Invalid Input. Please enter a numerical value")
 
+        
 #here i added the bank reciept for withdrawal and deposit(lorenz)
-
 
 #Account Information Changes
 def ChangeName(accountDatabase, accountIndex):
@@ -552,6 +561,15 @@ def transferFunds(accountDatabase, senderIndex):
 
 #################################################################################
 
+def CreateAccount(accountDatabase):
+    name = input("Enter your name: ")
+    accountNumber = input("Enter your account number: ")
+    balance = float(input("Enter your initial balance: "))
+    interestRate = float(input("Enter the interest rate for your account: "))
+    newAccount = Account(name, accountNumber, balance, interestRate)
+    accountDatabase.append(newAccount)
+    print("Account created successfully!")
+
 def AccountStatusInterface(accountDatabase, accountIndex):
     print("\n")
 
@@ -662,31 +680,31 @@ def bankreciept(accountDatabase, accountIndex, transactionType, amount, recipien
 def mainLoop():
     print("------------Welcome to XXX bank------------\n")
 
-    #Ensures that no errors are passed through and handles errors
+    # Ensures that no errors are passed through and handles errors
     while True:
-         userInput = input("What would you like to do?\n" +
-                           "A. Login to your account\n" +
-                           "B. Create Account\n" +
-                           "C. Quit\n"                                 )
-         #Ensures consistency
-         userInput = userInput.lower()
-         
-         #function selection
-         options = ["a", "b", "c"]
-         if any(userInput == option for option in options):
-             if userInput == "a":
+        userInput = input("What would you like to do?\n" +
+                          "A. Login to your account\n" +
+                          "B. Create Account\n" +
+                          "C. Apply Interest\n" +
+                          "D. Quit\n")
+        # Ensures consistency
+        userInput = userInput.lower()
+
+        # Function selection
+        options = ["a", "b", "c", "d"]
+        if any(userInput == option for option in options):
+            if userInput == "a":
                 if len(accountDatabase) != 0:
                     Login(accountDatabase)
-                    print("------------Welcome to XXX bank------------\n")
-                else:
-                    print("There are no accounts stored in the database. Please create an account and try again\n")
-             if userInput == "b":
-                AccountCreation(accountDatabase)
-                print("------------Welcome to XXX bank------------\n")
-             if userInput == "c":
-                 break
-         else:
-             print("Input is not valid, Please try again.\n")
+            elif userInput == "b":
+                CreateAccount(accountDatabase)
+            elif userInput == "c":
+                for account in accountDatabase:
+                    account.ApplyInterest()
+            elif userInput == "d":
+                break
+        else:
+            print("Invalid Input. Please try again\n")
             
     print("\n You have exited the program.")
     
@@ -696,6 +714,5 @@ def mainLoop():
 
     
         
-
 
 mainLoop()

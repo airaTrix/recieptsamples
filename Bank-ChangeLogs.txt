@@ -57,4 +57,7 @@ Changelog:
 
 - Added bankreciept function to generate receipts for withdrawals, deposits, and transfers
 - Updated Withdraw, Deposit, and transferFunds functions to call bankreciept with appropriate parameters
-- Updated ChangeIDNumber function to handle input validation and formatting for 12-digit or 14-character National ID numbers
+- Added ApplyInterest method to the Account class to calculate and apply interest to savings accounts.
+- Updated mainLoop function to include an option for applying interest to all accounts.
+- Ensured account creation includes setting an interest rate.
+- Added input validation and formatting for 12-digit or 14-character National ID numbers in the ChangeIDNumber function.
