@@ -61,3 +61,13 @@ Changelog:
 - Updated mainLoop function to include an option for applying interest to all accounts.
 - Ensured account creation includes setting an interest rate.
 - Added input validation and formatting for 12-digit or 14-character National ID numbers in the ChangeIDNumber function.
+
+Version 1.0.5 December 24, 2024
+
+- Added AccountStatusInterface function to handle account investment.
+- Added investment function to handle investment operations.
+
+
+Bugfix:
+- fixed a bug in mainLoop function to handle the main menu and user input.
+- Fixed TypeError in investment function by converting balance to float.
