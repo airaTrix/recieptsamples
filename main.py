@@ -1,27 +1,15 @@
 accountDatabase = []
 
 class Account:
-    def __init__(self, accountNumber, name, idNumber, email, phoneNumber, password, balance, interestRate=0.01):
+    def __init__(self, accountNumber, name, idNumber, email,  phoneNumber, password, initialDeposit):
         self.accountNumber = accountNumber
-        self.name = name
+        self.FirstName, self.MiddleInitial, self.Surname = name
         self.idNumber = idNumber
-        self.FirstName = name[0]
-        self.MiddleInitial = name[1]
-        self.Surname = name[2]
         self.email = email
         self.phoneNumber = phoneNumber
         self.password = password
-        self.balance = balance
-        self.interestRate = interestRate
+        self.currentBalance = initialDeposit #Because at creation, your current balance is the one you started with
 
-    def GetCurrentBalance(self):
-        return self.balance
-
-    def ApplyInterest(self):
-        interest = self.balance * self.interestRate
-        self.balance += interest
-        print(f"Interest of {interest:.2f} applied. New Balance: {self.balance:.2f}")
-#here i added funtions for interest and balance(lorenz)
     def ShowAccountInformation(self):
         print("Account Info: \n")
         print(f"Account Name: {self.GetName()}")
@@ -50,8 +38,11 @@ class Account:
     def GetAccountNumber(self):
         return self.accountNumber #Returns string
 
+    def GetCurrentBalance(self):
+        return float(self.currentBalance) #Returns float
+
     def UpdateBalance(self, value):
-        self.FirstName, self.MiddleInitial, self.Surname = name[0], name[1], name[2]
+        self.currentBalance = f"{float(self.currentBalance) +  value: .2f}" # For Subtraction, set value as negative ( -100 ) so that currentBalance += (-100)
 
     def UpdateName(self, name):
         self.FirstName, self.MiddleInitial, self.Surname = name
@@ -67,6 +58,9 @@ class Account:
 
     def UpdatePassword(self, password):
         self.password = password
+
+    def SetInvestmentOrInterest(self, amount):
+        self.currentBalance = f"{float(self.currentBalance) + amount: .2f}"
 
     def Withdraw(self, Amount):
         if float(Amount) <= float(self.GetCurrentBalance()):
@@ -101,8 +95,8 @@ class Account:
             except ValueError:
                 print("Invalid Input. Please enter a numerical value")
 
-        
 #here i added the bank reciept for withdrawal and deposit(lorenz)
+
 
 #Account Information Changes
 def ChangeName(accountDatabase, accountIndex):
@@ -561,15 +555,6 @@ def transferFunds(accountDatabase, senderIndex):
 
 #################################################################################
 
-def CreateAccount(accountDatabase):
-    name = input("Enter your name: ")
-    accountNumber = input("Enter your account number: ")
-    balance = float(input("Enter your initial balance: "))
-    interestRate = float(input("Enter the interest rate for your account: "))
-    newAccount = Account(name, accountNumber, balance, interestRate)
-    accountDatabase.append(newAccount)
-    print("Account created successfully!")
-
 def AccountStatusInterface(accountDatabase, accountIndex):
     print("\n")
 
@@ -579,27 +564,26 @@ def AccountStatusInterface(accountDatabase, accountIndex):
         accountDatabase[accountIndex].ShowAccountInformation()
 
         while True:
-            #Here iinsert ang options for withdrawal, fund transfer, all transaction history etc.. add nyo lang sa userInput ung options (b, c, etc....) and lagay nyo rin ung letter sa options list in lowercase
-
-            options = ["a", "b","c","d","e"] # add option here
+            # Insert options for withdrawal, fund transfer, all transaction history, etc.
+            options = ["a", "b", "c", "d", "e", "f"]  # Add option here
             
             userInput = input("What would you like to do?\n" +
                               "A. Edit Account Info\n" +
                               "B. Withdraw\n" +
                               "C. Deposit\n" +
                               "D. Transfer\n" +
-                              "E. Exit\n").lower()
+                              "E. Exit\n" +
+                              "F. Savings Interest\n").lower()
             if any(userInput == option for option in options):
                 if userInput == "a":
-                    EditAccountInfo(accountDatabase,accountIndex)
+                    EditAccountInfo(accountDatabase, accountIndex)
                 if userInput == "b":
-                    
                     while True:
                         try:
                             while True:
                                 Amount = input("How much would you like to withdraw?: ")
 
-                                isAmountFloat = float(Amount) #returns valueerror if not float
+                                isAmountFloat = float(Amount)  # Returns ValueError if not float
 
                                 if "." in Amount:
                                     if not(len(Amount.split(".")[-1]) == 2) and not (len(Amount.split(".")[-1]) == 1):
@@ -621,25 +605,23 @@ def AccountStatusInterface(accountDatabase, accountIndex):
                                     
                             if confirm == "yes":
                                 break
-
-                            
                         except ValueError:
                             print("Invalid Input. Please try again\n")
-
-                        
-
                     accountDatabase[accountIndex].Withdraw(Amount)
                 if userInput == "c":
                     accountDatabase[accountIndex].Deposit()
                 if userInput == "d":
                     transferFunds(accountDatabase, accountIndex)
+                if userInput == "f":
+                    savingsInterest(accountDatabase, accountIndex)
                 break
             else:
                 print("Invalid Input. Please try again")
 
-        #if user chose to quit
+        # If user chose to quit
         if userInput == "e":
             break
+
 
 def bankreciept(accountDatabase, accountIndex, transactionType, amount, recipientIndex=None):
     bankstatement = "please make sure that you have a copy of your receipt for future reference"
@@ -676,6 +658,33 @@ def bankreciept(accountDatabase, accountIndex, transactionType, amount, recipien
         transferreciept(accountDatabase, accountIndex, recipientIndex)
 
 
+def savingsInterest(accountDatabase, accountIndex):
+
+    def interestCalculation(accountDatabase, accountIndex):
+        interestRate = 0.02
+        currentBalance = accountDatabase[accountIndex].GetCurrentBalance()
+        interest = currentBalance * interestRate
+        accountDatabase[accountIndex].SetInvestmentOrInterest(interest)
+        print(f"Interest of {interest:.2f} has been added to your account.\n")
+        bankreciept(accountDatabase, accountIndex, "interest", interest)
+
+    def viewinterestdashboard(accountDatabase, accountIndex):
+        print("------------Interest Dashboard------------\n")
+        print(f"Current Balance: {accountDatabase[accountIndex].GetCurrentBalance()}\n")
+        print("Interest Rate: 2%\n")
+        print("Would you like to calculate interest or exit?\n")
+        while True:
+            options = ["a", "b"]
+            userInput = input("A. Calculate Interest\n" +
+                              "B. Exit\n").lower()
+            if any(userInput == option for option in options):
+                if userInput == "a":
+                    interestCalculation(accountDatabase, accountIndex)
+                if userInput == "b":
+                    break
+            else:
+                print("Invalid Input. Please try again.\n")
+
 #Main Loop
 def mainLoop():
     print("------------Welcome to XXX bank------------\n")
@@ -685,23 +694,19 @@ def mainLoop():
         userInput = input("What would you like to do?\n" +
                           "A. Login to your account\n" +
                           "B. Create Account\n" +
-                          "C. Apply Interest\n" +
-                          "D. Quit\n")
+                          "C. Quit\n")
         # Ensures consistency
         userInput = userInput.lower()
 
         # Function selection
-        options = ["a", "b", "c", "d"]
+        options = ["a", "b", "c"]
         if any(userInput == option for option in options):
             if userInput == "a":
                 if len(accountDatabase) != 0:
                     Login(accountDatabase)
             elif userInput == "b":
-                CreateAccount(accountDatabase)
+                AccountCreation(accountDatabase)
             elif userInput == "c":
-                for account in accountDatabase:
-                    account.ApplyInterest()
-            elif userInput == "d":
                 break
         else:
             print("Invalid Input. Please try again\n")
@@ -712,7 +717,5 @@ def mainLoop():
         
     
 
-    
-        
 
 mainLoop()

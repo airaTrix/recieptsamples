@@ -59,6 +59,15 @@ class Account:
     def UpdatePassword(self, password):
         self.password = password
 
+    def UpdateInvestment(self, amount):
+        if hasattr(self, 'investmentBalance'):
+            self.investmentBalance += amount
+        else:
+            self.investmentBalance = amount
+
+    def GetInvestmentBalance(self):
+        return getattr(self, 'investmentBalance', 0.0)
+
     def Withdraw(self, Amount):
         if float(Amount) <= float(self.GetCurrentBalance()):
             self.currentBalance = float(self.currentBalance) - float(Amount)
@@ -563,14 +572,15 @@ def AccountStatusInterface(accountDatabase, accountIndex):
         while True:
             #Here iinsert ang options for withdrawal, fund transfer, all transaction history etc.. add nyo lang sa userInput ung options (b, c, etc....) and lagay nyo rin ung letter sa options list in lowercase
 
-            options = ["a", "b","c","d","e"] # add option here
+            options = ["a", "b","c","d","e", "f"] # add option here
             
             userInput = input("What would you like to do?\n" +
                               "A. Edit Account Info\n" +
                               "B. Withdraw\n" +
                               "C. Deposit\n" +
                               "D. Transfer\n" +
-                              "E. Exit\n").lower()
+                              "E .Investment\n" +
+                              "F. Exit\n").lower()
             if any(userInput == option for option in options):
                 if userInput == "a":
                     EditAccountInfo(accountDatabase,accountIndex)
@@ -615,12 +625,14 @@ def AccountStatusInterface(accountDatabase, accountIndex):
                     accountDatabase[accountIndex].Deposit()
                 if userInput == "d":
                     transferFunds(accountDatabase, accountIndex)
-                break
+                    break
+                if userInput == "e":
+                    investment(accountDatabase, accountIndex)
             else:
                 print("Invalid Input. Please try again")
 
         #if user chose to quit
-        if userInput == "e":
+        if userInput == "f":
             break
 
 def bankreciept(accountDatabase, accountIndex, transactionType, amount, recipientIndex=None):
@@ -656,6 +668,66 @@ def bankreciept(accountDatabase, accountIndex, transactionType, amount, recipien
         depositreciept(accountDatabase, accountIndex)
     elif transactionType == "transfer":
         transferreciept(accountDatabase, accountIndex, recipientIndex)
+
+def investment(accountDatabase, accountIndex):
+
+    def interest(accountDatabase, accountIndex):
+        print("------------Interest------------\n")
+        interest = input("do you like to invest? yes or no: ")
+
+        if interest == "yes":
+            amount = float(input("Enter the amount you want to invest: "))
+            currentBalance = float(accountDatabase[accountIndex].GetCurrentBalance())  # Convert balance to float
+            if currentBalance >= amount:
+                accountDatabase[accountIndex].UpdateBalance(-amount)  # Deduct from current balance
+                accountDatabase[accountIndex].UpdateInvestment(amount)  # Add to investment balance
+                print("You have successfully invested in our bank")
+                print("You will receive your interest in 3 months")
+                print("Thank you for investing in our bank")
+                print("-----------------------------")
+            else:
+                print("Insufficient balance to invest")
+        elif interest == "no":
+            print("Thank you for visiting our bank")
+            print("Have a nice day")
+            print("Goodbye")
+            return
+        
+    def dashboard(accountDatabase, accountIndex):
+
+        user = input("Do you want to view your dashboard? yes or no: ")
+        if user == "yes":
+            print("------------Dashboard------------\n")
+            print(f"Name: {accountDatabase[accountIndex].GetName()}")
+            print(f"Account Number: {accountDatabase[accountIndex].GetAccountNumber()}")
+            print(f"Your current savings amount is: {accountDatabase[accountIndex].GetCurrentBalance()}")
+            print(f"Your current investment amount is: {accountDatabase[accountIndex].GetInvestmentBalance()}")
+            print("Thank you for visiting our bank")
+            print("Have a nice day")
+            print("-----------------------------")
+        
+        if user == "no":
+            print("Thank you for visiting our bank")
+            print("Have a nice day")
+            print("Goodbye")
+            return
+    
+    show = input("Do you want to view your 1. dashboard or 2. interest 3. no: ")
+
+    if show == "1":
+        dashboard(accountDatabase, accountIndex)
+    if show == "2":
+        interest(accountDatabase, accountIndex)
+    if show == "3":
+        print("Thank you for visiting our bank")
+        print("Have a nice day")
+        print("Goodbye")
+        return
+
+# Initialize account database
+accountDatabase = []  # Replace with actual account database
+
+
 
 
 #Main Loop
